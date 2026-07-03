@@ -119,13 +119,13 @@ src/PinBrowser/
 ## Creating a release
 
 The version lives in `<Version>` in [PinBrowser.csproj](src/PinBrowser/PinBrowser.csproj) (currently
-`0.0.1`). To produce a GitHub Release with a ready-to-use `.exe`:
+`0.0.2`). To produce a GitHub Release with a ready-to-use `.exe`:
 
 1. Update the version in the `.csproj` if needed and commit.
 2. Push a tag in the format `vX.Y.Z`, e.g.:
    ```
-   git tag v0.0.1
-   git push origin v0.0.1
+   git tag v0.0.2
+   git push origin v0.0.2
    ```
 3. The [.github/workflows/release.yml](.github/workflows/release.yml) workflow then builds the
    framework-dependent single-file exe on `windows-latest` and attaches it
