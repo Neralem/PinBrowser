@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 
 namespace PinBrowser;
@@ -10,6 +11,8 @@ public sealed class MainForm : Form
     private readonly Settings _settings;
     private readonly WebView2 _webView;
     private readonly bool _useFixedTitle;
+    private readonly bool _useFavicon;
+    private Icon? _faviconIcon;
 
     public MainForm()
     {
@@ -20,6 +23,7 @@ public sealed class MainForm : Form
         Text = _useFixedTitle ? _settings.Title : "PinBrowser";
 
         var icon = TryLoadIcon(_settings.IconPath);
+        _useFavicon = icon is null;
         if (icon is not null)
         {
             Icon = icon;
@@ -79,6 +83,12 @@ public sealed class MainForm : Form
                 _webView.CoreWebView2.DocumentTitleChanged += (_, _) =>
                     Text = _webView.CoreWebView2.DocumentTitle;
             }
+
+            if (_useFavicon)
+            {
+                _webView.CoreWebView2.FaviconChanged += async (_, _) => await UpdateFaviconFromPageAsync();
+                await UpdateFaviconFromPageAsync();
+            }
         }
         catch (Exception ex)
         {
@@ -86,6 +96,28 @@ public sealed class MainForm : Form
                 $"Die WebView2-Runtime konnte nicht initialisiert werden:\n{ex.Message}\n\n" +
                 "Bitte installiere die \"Microsoft Edge WebView2 Runtime\" (auf aktuellem Windows normalerweise vorinstalliert).",
                 "PinBrowser", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+
+    private async Task UpdateFaviconFromPageAsync()
+    {
+        try
+        {
+            using var stream = await _webView.CoreWebView2.GetFaviconAsync(CoreWebView2FaviconImageFormat.Png);
+            if (stream is null || stream.Length == 0)
+            {
+                return;
+            }
+
+            using var bitmap = new Bitmap(stream);
+            var newIcon = IconFromBitmap(bitmap);
+            Icon = newIcon;
+            _faviconIcon?.Dispose();
+            _faviconIcon = newIcon;
+        }
+        catch
+        {
+            // Keine Favicon-Daten verfügbar (z. B. lokale Datei ohne Favicon) - Standard-Icon bleibt.
         }
     }
 
@@ -113,20 +145,25 @@ public sealed class MainForm : Form
             }
 
             using var bitmap = new Bitmap(resolvedPath);
-            var hIcon = bitmap.GetHicon();
-            try
-            {
-                using var handleIcon = Icon.FromHandle(hIcon);
-                return (Icon)handleIcon.Clone();
-            }
-            finally
-            {
-                DestroyIcon(hIcon);
-            }
+            return IconFromBitmap(bitmap);
         }
         catch
         {
             return null;
+        }
+    }
+
+    private static Icon IconFromBitmap(Bitmap bitmap)
+    {
+        var hIcon = bitmap.GetHicon();
+        try
+        {
+            using var handleIcon = Icon.FromHandle(hIcon);
+            return (Icon)handleIcon.Clone();
+        }
+        finally
+        {
+            DestroyIcon(hIcon);
         }
     }
 

@@ -44,7 +44,7 @@ Liegt im selben Ordner wie die `.exe` und sieht z. B. so aus:
 | `WindowWidth/Height` | Fenstergröße.                                                        |
 | `Maximized`    | Ob das Fenster maximiert war.                                              |
 | `AutoStart`    | `true` = trägt sich automatisch in den Windows-Autostart ein, `false` = entfernt den Eintrag wieder. |
-| `IconPath`     | Optionaler Pfad zu einem Icon (`.ico`, aber auch `.png`/`.bmp`/... funktionieren) für das Fenster-Icon. Relative Pfade werden relativ zur exe aufgelöst. Leer oder Datei nicht vorhanden → Standard-Icon. |
+| `IconPath`     | Optionaler Pfad zu einem Icon (`.ico`, aber auch `.png`/`.bmp`/... funktionieren) für das Fenster-Icon. Relative Pfade werden relativ zur exe aufgelöst. Leer oder Datei nicht vorhanden → stattdessen wird automatisch das Favicon der geladenen Seite verwendet (aktualisiert sich, wenn die Seite ihr Favicon ändert). |
 | `Title`        | Optionaler fester Fenstertitel. Leer → der Fenstertitel folgt automatisch dem `<title>` der geladenen Seite. |
 | `InstanceId`   | Wird automatisch generiert, sobald es fehlt. Identifiziert diese Installation eindeutig im Autostart – nicht manuell ändern. |
 
