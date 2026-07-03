@@ -12,6 +12,12 @@ public sealed class Settings
     public bool Maximized { get; set; }
     public bool AutoStart { get; set; } = true;
 
+    /// <summary>
+    /// Stable per-installation id, used so that copies of PinBrowser living in different
+    /// folders each get their own Windows-autostart entry instead of overwriting each other's.
+    /// </summary>
+    public string InstanceId { get; set; } = "";
+
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
 
     public static string FilePath => Path.Combine(AppContext.BaseDirectory, "settings.json");
@@ -19,26 +25,42 @@ public sealed class Settings
     public static Settings Load()
     {
         var path = FilePath;
+        Settings settings;
+        var needsSave = false;
 
         if (!File.Exists(path))
         {
-            var defaults = new Settings();
-            defaults.Save();
-            return defaults;
+            settings = new Settings();
+            needsSave = true;
+        }
+        else
+        {
+            try
+            {
+                var json = File.ReadAllText(path);
+                settings = JsonSerializer.Deserialize<Settings>(json, JsonOptions) ?? new Settings();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"settings.json konnte nicht gelesen werden und wird ignoriert (Standardwerte werden verwendet):\n{ex.Message}",
+                    "PinBrowser", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                settings = new Settings();
+            }
         }
 
-        try
+        if (string.IsNullOrEmpty(settings.InstanceId))
         {
-            var json = File.ReadAllText(path);
-            return JsonSerializer.Deserialize<Settings>(json, JsonOptions) ?? new Settings();
+            settings.InstanceId = Guid.NewGuid().ToString("N");
+            needsSave = true;
         }
-        catch (Exception ex)
+
+        if (needsSave)
         {
-            MessageBox.Show(
-                $"settings.json konnte nicht gelesen werden und wird ignoriert (Standardwerte werden verwendet):\n{ex.Message}",
-                "PinBrowser", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            return new Settings();
+            settings.Save();
         }
+
+        return settings;
     }
 
     public void Save()

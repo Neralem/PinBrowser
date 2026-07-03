@@ -1,23 +1,30 @@
+using System.Runtime.InteropServices;
 using Microsoft.Web.WebView2.WinForms;
 
 namespace PinBrowser;
 
 public sealed class MainForm : Form
 {
+    private const int WM_SETTINGCHANGE = 0x001A;
+
     private readonly Settings _settings;
     private readonly WebView2 _webView;
 
     public MainForm()
     {
         _settings = Settings.Load();
-        AutoStart.Apply(_settings.AutoStart);
+        AutoStart.Apply(_settings.InstanceId, _settings.AutoStart);
 
         Text = "PinBrowser";
         StartPosition = FormStartPosition.Manual;
         Bounds = EnsureOnScreen(new Rectangle(
             _settings.WindowX, _settings.WindowY, _settings.WindowWidth, _settings.WindowHeight));
 
-        _webView = new WebView2 { Dock = DockStyle.Fill };
+        _webView = new WebView2
+        {
+            Dock = DockStyle.Fill,
+            DefaultBackgroundColor = ThemeHelper.IsSystemDarkMode() ? Color.Black : Color.White,
+        };
         Controls.Add(_webView);
 
         if (Uri.TryCreate(_settings.Url, UriKind.Absolute, out var startUri))
@@ -31,6 +38,23 @@ public sealed class MainForm : Form
         }
 
         FormClosing += OnFormClosing;
+    }
+
+    protected override void OnHandleCreated(EventArgs e)
+    {
+        base.OnHandleCreated(e);
+        ThemeHelper.ApplyTitleBarTheme(Handle, ThemeHelper.IsSystemDarkMode());
+    }
+
+    protected override void WndProc(ref Message m)
+    {
+        if (m.Msg == WM_SETTINGCHANGE && m.LParam != IntPtr.Zero &&
+            Marshal.PtrToStringUni(m.LParam) == "ImmersiveColorSet")
+        {
+            ThemeHelper.ApplyTitleBarTheme(Handle, ThemeHelper.IsSystemDarkMode());
+        }
+
+        base.WndProc(ref m);
     }
 
     protected override async void OnLoad(EventArgs e)
