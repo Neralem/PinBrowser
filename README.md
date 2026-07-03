@@ -57,7 +57,7 @@ zentriert.
 
 ## Bauen
 
-Voraussetzung: .NET SDK 8 (oder neuer).
+Voraussetzung: .NET SDK 10 (oder neuer).
 
 ```
 dotnet build
