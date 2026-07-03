@@ -16,6 +16,8 @@ auf einem bestimmten Monitor zieht – getrennt vom normalen Browser mit den res
   unterschiedlichen Ordnern bekommen dabei jeweils einen eigenen Eintrag statt sich gegenseitig zu
   überschreiben.
 - Titelleiste folgt automatisch dem hellen/dunklen Windows-Design (auch live bei Themenwechsel).
+- Optionales eigenes Fenster-Icon und optionaler fester Fenstertitel; ohne festen Titel wird
+  automatisch der Titel der geladenen Seite übernommen.
 
 ## settings.json
 
@@ -29,7 +31,9 @@ Liegt im selben Ordner wie die `.exe` und sieht z. B. so aus:
   "WindowWidth": 1000,
   "WindowHeight": 700,
   "Maximized": false,
-  "AutoStart": true
+  "AutoStart": true,
+  "IconPath": "",
+  "Title": ""
 }
 ```
 
@@ -40,6 +44,8 @@ Liegt im selben Ordner wie die `.exe` und sieht z. B. so aus:
 | `WindowWidth/Height` | Fenstergröße.                                                        |
 | `Maximized`    | Ob das Fenster maximiert war.                                              |
 | `AutoStart`    | `true` = trägt sich automatisch in den Windows-Autostart ein, `false` = entfernt den Eintrag wieder. |
+| `IconPath`     | Optionaler Pfad zu einem Icon (`.ico`, aber auch `.png`/`.bmp`/... funktionieren) für das Fenster-Icon. Relative Pfade werden relativ zur exe aufgelöst. Leer oder Datei nicht vorhanden → Standard-Icon. |
+| `Title`        | Optionaler fester Fenstertitel. Leer → der Fenstertitel folgt automatisch dem `<title>` der geladenen Seite. |
 | `InstanceId`   | Wird automatisch generiert, sobald es fehlt. Identifiziert diese Installation eindeutig im Autostart – nicht manuell ändern. |
 
 `Url` wird **nicht** automatisch überschrieben, wenn man innerhalb der Seite navigiert – nur Fenster-

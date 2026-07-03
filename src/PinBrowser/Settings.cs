@@ -13,6 +13,17 @@ public sealed class Settings
     public bool AutoStart { get; set; } = true;
 
     /// <summary>
+    /// Optional path to an icon file for the window icon. Relative paths are resolved against the
+    /// folder the exe lives in. If empty or the file doesn't exist, the default icon is used.
+    /// </summary>
+    public string IconPath { get; set; } = "";
+
+    /// <summary>
+    /// Optional fixed window title. If empty, the window title follows the loaded page's title.
+    /// </summary>
+    public string Title { get; set; } = "";
+
+    /// <summary>
     /// Stable per-installation id, used so that copies of PinBrowser living in different
     /// folders each get their own Windows-autostart entry instead of overwriting each other's.
     /// </summary>

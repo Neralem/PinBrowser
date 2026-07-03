@@ -9,13 +9,22 @@ public sealed class MainForm : Form
 
     private readonly Settings _settings;
     private readonly WebView2 _webView;
+    private readonly bool _useFixedTitle;
 
     public MainForm()
     {
         _settings = Settings.Load();
         AutoStart.Apply(_settings.InstanceId, _settings.AutoStart);
 
-        Text = "PinBrowser";
+        _useFixedTitle = !string.IsNullOrWhiteSpace(_settings.Title);
+        Text = _useFixedTitle ? _settings.Title : "PinBrowser";
+
+        var icon = TryLoadIcon(_settings.IconPath);
+        if (icon is not null)
+        {
+            Icon = icon;
+        }
+
         StartPosition = FormStartPosition.Manual;
         Bounds = EnsureOnScreen(new Rectangle(
             _settings.WindowX, _settings.WindowY, _settings.WindowWidth, _settings.WindowHeight));
@@ -64,6 +73,12 @@ public sealed class MainForm : Form
         try
         {
             await _webView.EnsureCoreWebView2Async();
+
+            if (!_useFixedTitle)
+            {
+                _webView.CoreWebView2.DocumentTitleChanged += (_, _) =>
+                    Text = _webView.CoreWebView2.DocumentTitle;
+            }
         }
         catch (Exception ex)
         {
@@ -73,6 +88,50 @@ public sealed class MainForm : Form
                 "PinBrowser", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
+
+    private static Icon? TryLoadIcon(string iconPath)
+    {
+        if (string.IsNullOrWhiteSpace(iconPath))
+        {
+            return null;
+        }
+
+        var resolvedPath = Path.IsPathRooted(iconPath)
+            ? iconPath
+            : Path.Combine(AppContext.BaseDirectory, iconPath);
+
+        if (!File.Exists(resolvedPath))
+        {
+            return null;
+        }
+
+        try
+        {
+            if (string.Equals(Path.GetExtension(resolvedPath), ".ico", StringComparison.OrdinalIgnoreCase))
+            {
+                return new Icon(resolvedPath);
+            }
+
+            using var bitmap = new Bitmap(resolvedPath);
+            var hIcon = bitmap.GetHicon();
+            try
+            {
+                using var handleIcon = Icon.FromHandle(hIcon);
+                return (Icon)handleIcon.Clone();
+            }
+            finally
+            {
+                DestroyIcon(hIcon);
+            }
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    [DllImport("user32.dll")]
+    private static extern bool DestroyIcon(IntPtr handle);
 
     private void OnFormClosing(object? sender, FormClosingEventArgs e)
     {
