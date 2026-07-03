@@ -4,8 +4,11 @@ A minimal Windows browser for **one** pinned website. Built for the case where y
 specific page (e.g. a dashboard) into its own window at a fixed spot on a specific monitor —
 separate from your regular browser with all its other tabs.
 
-- Single, self-contained `.exe` (no separate .NET install required — self-contained single-file
-  build).
+- Single `.exe`, no extra DLLs of its own next to it. Just drop it anywhere and run it — no
+  installer.
+- Framework-dependent: requires the matching **.NET Desktop Runtime** (currently .NET 10) to
+  already be installed on the machine — kept this way deliberately to keep the exe small
+  (~1-2 MB) instead of bundling the whole .NET runtime into it.
 - Rendering via **WebView2** (the Chromium engine that's usually already preinstalled on current
   Windows 10/11).
 - Settings live in `settings.json` right next to the `.exe` and get created with default values on
@@ -67,9 +70,17 @@ dotnet build
 dotnet publish src/PinBrowser/PinBrowser.csproj -c Release -o publish
 ```
 
-Result: `publish/PinBrowser.exe` — a single, self-contained file (~70 MB, since the .NET runtime is
-embedded). This file can be copied to any folder and run from there; `settings.json` gets created
-next to it.
+Result: `publish/PinBrowser.exe` — a single file, no other DLLs alongside it (~1-2 MB). This file
+can be copied to any folder and run from there; `settings.json` gets created next to it.
+
+This is a **framework-dependent** build: the target machine needs the **.NET 10 Desktop Runtime**
+(x64) installed already — get it from Microsoft's official .NET downloads page if it's not there
+yet. If you'd rather have zero prerequisites at the cost of a much bigger exe (the whole runtime
+gets embedded instead), publish self-contained instead:
+
+```
+dotnet publish src/PinBrowser/PinBrowser.csproj -c Release -r win-x64 --self-contained true -p:EnableCompressionInSingleFile=true -o publish
+```
 
 > Note: the build prints an `MSB3277` warning about conflicting `WindowsBase` versions. This is a
 > known, harmless side effect of the WebView2 NuGet package (it ships both a WinForms and a WPF
@@ -115,7 +126,7 @@ The version lives in `<Version>` in [PinBrowser.csproj](src/PinBrowser/PinBrowse
    git push origin v0.0.1
    ```
 3. The [.github/workflows/release.yml](.github/workflows/release.yml) workflow then builds the
-   self-contained single-file exe on `windows-latest` and attaches it
+   framework-dependent single-file exe on `windows-latest` and attaches it
    (`PinBrowser-<version>-win-x64.exe`) to the GitHub Release for that tag.
 
 The workflow can also be triggered manually via "Run workflow" in the GitHub Actions tab, but that

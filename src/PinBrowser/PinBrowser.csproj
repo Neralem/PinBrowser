@@ -12,12 +12,13 @@
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
     <InvariantGlobalization>true</InvariantGlobalization>
 
-    <!-- Single, self-contained exe: no separate .NET runtime install required on the target machine. -->
+    <!-- Single exe with no extra DLLs of its own next to it. Framework-dependent: the matching
+         .NET Desktop Runtime must already be installed on the target machine (nothing gets
+         embedded/downloaded here), keeping the exe small instead of bundling the whole runtime. -->
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-    <SelfContained>true</SelfContained>
+    <SelfContained>false</SelfContained>
     <PublishSingleFile>true</PublishSingleFile>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
-    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
     <DebugType>none</DebugType>
   </PropertyGroup>
 

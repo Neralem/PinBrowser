@@ -19,8 +19,8 @@ jobs:
         with:
           dotnet-version: "10.0.x"
 
-      - name: Publish self-contained single-file exe
-        run: dotnet publish src/PinBrowser/PinBrowser.csproj -c Release -r win-x64 --self-contained true -o publish
+      - name: Publish single-file exe (framework-dependent)
+        run: dotnet publish src/PinBrowser/PinBrowser.csproj -c Release -r win-x64 --self-contained false -o publish
 
       - name: Rename exe with version
         shell: pwsh
