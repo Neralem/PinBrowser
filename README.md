@@ -12,7 +12,10 @@ auf einem bestimmten Monitor zieht – getrennt vom normalen Browser mit den res
   Standardwerten angelegt, falls sie fehlen.
 - Fenstergröße und -position werden beim Schließen automatisch gespeichert und beim nächsten Start
   wiederhergestellt.
-- Registriert sich optional selbst für den Windows-Autostart (`HKCU\...\Run`).
+- Registriert sich optional selbst für den Windows-Autostart (`HKCU\...\Run`) – mehrere Kopien in
+  unterschiedlichen Ordnern bekommen dabei jeweils einen eigenen Eintrag statt sich gegenseitig zu
+  überschreiben.
+- Titelleiste folgt automatisch dem hellen/dunklen Windows-Design (auch live bei Themenwechsel).
 
 ## settings.json
 
@@ -37,6 +40,7 @@ Liegt im selben Ordner wie die `.exe` und sieht z. B. so aus:
 | `WindowWidth/Height` | Fenstergröße.                                                        |
 | `Maximized`    | Ob das Fenster maximiert war.                                              |
 | `AutoStart`    | `true` = trägt sich automatisch in den Windows-Autostart ein, `false` = entfernt den Eintrag wieder. |
+| `InstanceId`   | Wird automatisch generiert, sobald es fehlt. Identifiziert diese Installation eindeutig im Autostart – nicht manuell ändern. |
 
 `Url` wird **nicht** automatisch überschrieben, wenn man innerhalb der Seite navigiert – nur Fenster-
 größe/-position und der Autostart-Status werden bei jedem Start/Beenden synchronisiert.
@@ -70,9 +74,18 @@ eingebettet ist). Diese Datei kann in einen beliebigen Ordner kopiert und von do
 ## Autostart einrichten
 
 `AutoStart` ist standardmäßig `true`. Beim ersten Start trägt sich die exe selbst mit ihrem aktuellen
-Pfad in `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run` ein. Verschiebt man die exe
-später an einen anderen Ort, wird der Registry-Eintrag beim nächsten Start automatisch auf den neuen
-Pfad aktualisiert. Setzt man `AutoStart` auf `false`, wird der Eintrag beim nächsten Start entfernt.
+Pfad in `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run` ein, unter einem Registry-
+Wertnamen, der die `InstanceId` aus der `settings.json` enthält (`PinBrowser_<id>`). Dadurch können
+mehrere Kopien von PinBrowser – etwa je eine pro angepinnter Seite, in eigenen Ordnern – gleichzeitig
+im Autostart stehen, ohne sich gegenseitig zu überschreiben. Verschiebt man eine exe später an einen
+anderen Ort, wird ihr Registry-Eintrag beim nächsten Start automatisch auf den neuen Pfad aktualisiert.
+Setzt man `AutoStart` auf `false`, wird der Eintrag dieser Installation beim nächsten Start entfernt.
+
+## Dunkles/helles Design
+
+Die native Titelleiste folgt automatisch dem in Windows eingestellten hellen/dunklen Design
+(`DWMWA_USE_IMMERSIVE_DARK_MODE`) und reagiert auch live, wenn das System-Design während der Laufzeit
+umgeschaltet wird – ein Neustart ist nicht nötig.
 
 ## Projektstruktur
 
@@ -80,7 +93,8 @@ Pfad aktualisiert. Setzt man `AutoStart` auf `false`, wird der Eintrag beim näc
 src/PinBrowser/
   PinBrowser.csproj   Projekt- und Publish-Einstellungen
   Program.cs          Einstiegspunkt
-  MainForm.cs          Fenster mit WebView2-Steuerelement, Positions-/Größen-Handling
-  Settings.cs          Laden/Speichern von settings.json
-  AutoStart.cs          Registry-Eintrag für Windows-Autostart
+  MainForm.cs          Fenster mit WebView2-Steuerelement, Positions-/Größen-Handling, Theme-Hooks
+  Settings.cs          Laden/Speichern von settings.json, InstanceId-Vergabe
+  AutoStart.cs          Registry-Eintrag für Windows-Autostart (pro Instanz)
+  ThemeHelper.cs        Windows-Design erkennen und auf die Titelleiste anwenden
 ```
