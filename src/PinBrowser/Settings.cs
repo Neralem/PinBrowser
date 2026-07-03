@@ -54,7 +54,7 @@ public sealed class Settings
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    $"settings.json konnte nicht gelesen werden und wird ignoriert (Standardwerte werden verwendet):\n{ex.Message}",
+                    $"settings.json could not be read and will be ignored (using default values):\n{ex.Message}",
                     "PinBrowser", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 settings = new Settings();
             }

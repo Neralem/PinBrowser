@@ -1,27 +1,26 @@
 # PinBrowser
 
-Ein minimaler Windows-Browser für **eine** fest angepinnte Webseite. Gedacht für den Fall, dass man
-sich eine bestimmte Seite (z. B. ein Dashboard) immer in einem eigenen Fenster an eine feste Stelle
-auf einem bestimmten Monitor zieht – getrennt vom normalen Browser mit den restlichen Tabs.
+A minimal Windows browser for **one** pinned website. Built for the case where you always drag a
+specific page (e.g. a dashboard) into its own window at a fixed spot on a specific monitor —
+separate from your regular browser with all its other tabs.
 
-- Einzelne, selbstständige `.exe` (kein separates .NET muss installiert sein – self-contained
-  Single-File-Build).
-- Rendering über **WebView2** (Chromium-Engine, die auf aktuellem Windows 10/11 i. d. R. schon
-  mitgeliefert ist).
-- Einstellungen liegen in `settings.json` direkt neben der `.exe` und werden beim ersten Start mit
-  Standardwerten angelegt, falls sie fehlen.
-- Fenstergröße und -position werden beim Schließen automatisch gespeichert und beim nächsten Start
-  wiederhergestellt.
-- Registriert sich optional selbst für den Windows-Autostart (`HKCU\...\Run`) – mehrere Kopien in
-  unterschiedlichen Ordnern bekommen dabei jeweils einen eigenen Eintrag statt sich gegenseitig zu
-  überschreiben.
-- Titelleiste folgt automatisch dem hellen/dunklen Windows-Design (auch live bei Themenwechsel).
-- Optionales eigenes Fenster-Icon und optionaler fester Fenstertitel; ohne festen Titel wird
-  automatisch der Titel der geladenen Seite übernommen.
+- Single, self-contained `.exe` (no separate .NET install required — self-contained single-file
+  build).
+- Rendering via **WebView2** (the Chromium engine that's usually already preinstalled on current
+  Windows 10/11).
+- Settings live in `settings.json` right next to the `.exe` and get created with default values on
+  first run if missing.
+- Window size and position are saved automatically on close and restored on the next start.
+- Optionally registers itself for Windows autostart (`HKCU\...\Run`) — multiple copies in
+  different folders each get their own entry instead of overwriting each other's.
+- The title bar automatically follows the light/dark Windows theme (live, even if you switch it
+  while running).
+- Optional custom window icon and optional fixed window title; without a fixed title, the window
+  title automatically follows the loaded page's title.
 
 ## settings.json
 
-Liegt im selben Ordner wie die `.exe` und sieht z. B. so aus:
+Lives in the same folder as the `.exe` and looks like this:
 
 ```json
 {
@@ -37,88 +36,87 @@ Liegt im selben Ordner wie die `.exe` und sieht z. B. so aus:
 }
 ```
 
-| Feld           | Bedeutung                                                                 |
+| Field          | Meaning                                                                   |
 |----------------|----------------------------------------------------------------------------|
-| `Url`          | Wird beim Start aufgerufen. Manuell anpassen und Programm neu starten.     |
-| `WindowX/Y`    | Fensterposition (in Bildschirmkoordinaten, auch über mehrere Monitore).    |
-| `WindowWidth/Height` | Fenstergröße.                                                        |
-| `Maximized`    | Ob das Fenster maximiert war.                                              |
-| `AutoStart`    | `true` = trägt sich automatisch in den Windows-Autostart ein, `false` = entfernt den Eintrag wieder. |
-| `IconPath`     | Optionaler Pfad zu einem Icon (`.ico`, aber auch `.png`/`.bmp`/... funktionieren) für das Fenster-Icon. Relative Pfade werden relativ zur exe aufgelöst. Leer oder Datei nicht vorhanden → stattdessen wird automatisch das Favicon der geladenen Seite verwendet (aktualisiert sich, wenn die Seite ihr Favicon ändert). |
-| `Title`        | Optionaler fester Fenstertitel. Leer → der Fenstertitel folgt automatisch dem `<title>` der geladenen Seite. |
-| `InstanceId`   | Wird automatisch generiert, sobald es fehlt. Identifiziert diese Installation eindeutig im Autostart – nicht manuell ändern. |
+| `Url`          | Loaded on startup. Edit it manually and restart the program to change it. |
+| `WindowX/Y`    | Window position (in screen coordinates, works across multiple monitors).  |
+| `WindowWidth/Height` | Window size.                                                         |
+| `Maximized`    | Whether the window was maximized.                                         |
+| `AutoStart`    | `true` = registers itself in Windows autostart, `false` = removes the entry again. |
+| `IconPath`     | Optional path to an icon (`.ico`, but `.png`/`.bmp`/... work too) for the window icon. Relative paths are resolved against the exe. Empty or file not found → falls back to the loaded page's favicon (updates live if the page's favicon changes). |
+| `Title`        | Optional fixed window title. Empty → the window title automatically follows the loaded page's `<title>`. |
+| `InstanceId`   | Generated automatically if missing. Uniquely identifies this installation in autostart — don't edit it by hand. |
 
-`Url` wird **nicht** automatisch überschrieben, wenn man innerhalb der Seite navigiert – nur Fenster-
-größe/-position und der Autostart-Status werden bei jedem Start/Beenden synchronisiert.
+`Url` is **not** automatically overwritten when you navigate within the page — only window
+size/position and the autostart status are synced on every start/close.
 
-Falls die gespeicherte Position beim Start auf keinem angeschlossenen Monitor mehr sichtbar wäre
-(z. B. weil ein Monitor abgesteckt wurde), wird das Fenster automatisch auf dem Hauptbildschirm
-zentriert.
+If the saved position wouldn't be visible on any connected monitor at startup (e.g. because a
+monitor got unplugged), the window is automatically centered on the primary screen.
 
-## Bauen
+## Building
 
-Voraussetzung: .NET SDK 10 (oder neuer).
+Requires .NET SDK 10 (or newer).
 
 ```
 dotnet build
 ```
 
-## Veröffentlichen (einzelne exe)
+## Publishing (single exe)
 
 ```
 dotnet publish src/PinBrowser/PinBrowser.csproj -c Release -o publish
 ```
 
-Ergebnis: `publish/PinBrowser.exe` – eine einzelne, self-contained Datei (~70 MB, da die .NET-Runtime
-eingebettet ist). Diese Datei kann in einen beliebigen Ordner kopiert und von dort gestartet werden;
-`settings.json` wird daneben angelegt.
+Result: `publish/PinBrowser.exe` — a single, self-contained file (~70 MB, since the .NET runtime is
+embedded). This file can be copied to any folder and run from there; `settings.json` gets created
+next to it.
 
-> Hinweis: Beim Build erscheint eine Warnung `MSB3277` wegen widersprüchlicher `WindowsBase`-Versionen.
-> Das ist ein bekanntes, harmloses Nebenprodukt des WebView2-NuGet-Pakets (liefert sowohl eine
-> WinForms- als auch eine WPF-Variante mit) und hat keinen Einfluss auf die Funktion.
+> Note: the build prints an `MSB3277` warning about conflicting `WindowsBase` versions. This is a
+> known, harmless side effect of the WebView2 NuGet package (it ships both a WinForms and a WPF
+> variant) and has no effect on functionality.
 
-## Autostart einrichten
+## Setting up autostart
 
-`AutoStart` ist standardmäßig `true`. Beim ersten Start trägt sich die exe selbst mit ihrem aktuellen
-Pfad in `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run` ein, unter einem Registry-
-Wertnamen, der die `InstanceId` aus der `settings.json` enthält (`PinBrowser_<id>`). Dadurch können
-mehrere Kopien von PinBrowser – etwa je eine pro angepinnter Seite, in eigenen Ordnern – gleichzeitig
-im Autostart stehen, ohne sich gegenseitig zu überschreiben. Verschiebt man eine exe später an einen
-anderen Ort, wird ihr Registry-Eintrag beim nächsten Start automatisch auf den neuen Pfad aktualisiert.
-Setzt man `AutoStart` auf `false`, wird der Eintrag dieser Installation beim nächsten Start entfernt.
+`AutoStart` defaults to `true`. On first run, the exe registers itself with its current path under
+`HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run`, using a registry value name that
+includes the `InstanceId` from `settings.json` (`PinBrowser_<id>`). That way, multiple copies of
+PinBrowser — e.g. one per pinned page, each in its own folder — can all be in autostart at the same
+time without overwriting each other. If you move an exe to a different location later, its registry
+entry is automatically updated to the new path on the next start. Setting `AutoStart` to `false`
+removes that installation's entry on the next start.
 
-## Dunkles/helles Design
+## Light/dark theme
 
-Die native Titelleiste folgt automatisch dem in Windows eingestellten hellen/dunklen Design
-(`DWMWA_USE_IMMERSIVE_DARK_MODE`) und reagiert auch live, wenn das System-Design während der Laufzeit
-umgeschaltet wird – ein Neustart ist nicht nötig.
+The native title bar automatically follows the light/dark theme set in Windows
+(`DWMWA_USE_IMMERSIVE_DARK_MODE`) and also reacts live if the system theme is switched while the app
+is running — no restart needed.
 
-## Projektstruktur
+## Project structure
 
 ```
 src/PinBrowser/
-  PinBrowser.csproj   Projekt- und Publish-Einstellungen
-  Program.cs          Einstiegspunkt
-  MainForm.cs          Fenster mit WebView2-Steuerelement, Positions-/Größen-Handling, Theme-Hooks
-  Settings.cs          Laden/Speichern von settings.json, InstanceId-Vergabe
-  AutoStart.cs          Registry-Eintrag für Windows-Autostart (pro Instanz)
-  ThemeHelper.cs        Windows-Design erkennen und auf die Titelleiste anwenden
+  PinBrowser.csproj   Project and publish settings
+  Program.cs          Entry point
+  MainForm.cs          Window with the WebView2 control, position/size handling, theme hooks
+  Settings.cs          Loading/saving settings.json, InstanceId assignment
+  AutoStart.cs          Registry entry for Windows autostart (per instance)
+  ThemeHelper.cs        Detects the Windows theme and applies it to the title bar
 ```
 
-## Release erstellen
+## Creating a release
 
-Die Version steht in `<Version>` in [PinBrowser.csproj](src/PinBrowser/PinBrowser.csproj) (aktuell `0.0.1`).
-Um einen GitHub Release mit fertiger `.exe` zum Download zu erzeugen:
+The version lives in `<Version>` in [PinBrowser.csproj](src/PinBrowser/PinBrowser.csproj) (currently
+`0.0.1`). To produce a GitHub Release with a ready-to-use `.exe`:
 
-1. Version in der `.csproj` ggf. anpassen und committen.
-2. Einen Tag im Format `vX.Y.Z` pushen, z. B.:
+1. Update the version in the `.csproj` if needed and commit.
+2. Push a tag in the format `vX.Y.Z`, e.g.:
    ```
    git tag v0.0.1
    git push origin v0.0.1
    ```
-3. Der Workflow [.github/workflows/release.yml](.github/workflows/release.yml) baut daraufhin auf
-   `windows-latest` die self-contained Single-File-exe und veröffentlicht sie als Anhang
-   (`PinBrowser-<version>-win-x64.exe`) am GitHub Release zu diesem Tag.
+3. The [.github/workflows/release.yml](.github/workflows/release.yml) workflow then builds the
+   self-contained single-file exe on `windows-latest` and attaches it
+   (`PinBrowser-<version>-win-x64.exe`) to the GitHub Release for that tag.
 
-Der Workflow lässt sich auch manuell über "Run workflow" in den GitHub Actions auslösen (Tab
-"Actions"), dann aber nur als Build-Artefakt zum Download – ohne Tag wird kein Release angelegt.
+The workflow can also be triggered manually via "Run workflow" in the GitHub Actions tab, but that
+only produces a downloadable build artifact — without a tag, no release is created.

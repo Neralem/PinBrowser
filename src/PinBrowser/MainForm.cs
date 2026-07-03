@@ -93,8 +93,8 @@ public sealed class MainForm : Form
         catch (Exception ex)
         {
             MessageBox.Show(this,
-                $"Die WebView2-Runtime konnte nicht initialisiert werden:\n{ex.Message}\n\n" +
-                "Bitte installiere die \"Microsoft Edge WebView2 Runtime\" (auf aktuellem Windows normalerweise vorinstalliert).",
+                $"The WebView2 runtime could not be initialized:\n{ex.Message}\n\n" +
+                "Please install the \"Microsoft Edge WebView2 Runtime\" (usually preinstalled on current Windows versions).",
                 "PinBrowser", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
@@ -117,7 +117,7 @@ public sealed class MainForm : Form
         }
         catch
         {
-            // Keine Favicon-Daten verfügbar (z. B. lokale Datei ohne Favicon) - Standard-Icon bleibt.
+            // No favicon data available (e.g. local file without a favicon) - keep the current icon.
         }
     }
 
