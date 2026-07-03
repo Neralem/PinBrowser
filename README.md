@@ -34,6 +34,7 @@ Lives in the same folder as the `.exe` and looks like this:
   "WindowHeight": 700,
   "Maximized": false,
   "AutoStart": true,
+  "ShowInTaskbar": true,
   "IconPath": "",
   "Title": ""
 }
@@ -46,6 +47,7 @@ Lives in the same folder as the `.exe` and looks like this:
 | `WindowWidth/Height` | Window size.                                                         |
 | `Maximized`    | Whether the window was maximized.                                         |
 | `AutoStart`    | `true` = registers itself in Windows autostart, `false` = removes the entry again. |
+| `ShowInTaskbar` | `true` (default) = normal taskbar entry, `false` = window doesn't show up in the taskbar. |
 | `IconPath`     | Optional path to an icon (`.ico`, but `.png`/`.bmp`/... work too) for the window icon. Relative paths are resolved against the exe. Empty or file not found → falls back to the loaded page's favicon (updates live if the page's favicon changes). |
 | `Title`        | Optional fixed window title. Empty → the window title automatically follows the loaded page's `<title>`. |
 | `InstanceId`   | Generated automatically if missing. Uniquely identifies this installation in autostart — don't edit it by hand. |

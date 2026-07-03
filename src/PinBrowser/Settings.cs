@@ -11,6 +11,7 @@ public sealed class Settings
     public int WindowHeight { get; set; } = 700;
     public bool Maximized { get; set; }
     public bool AutoStart { get; set; } = true;
+    public bool ShowInTaskbar { get; set; } = true;
 
     /// <summary>
     /// Optional path to an icon file for the window icon. Relative paths are resolved against the

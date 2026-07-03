@@ -21,6 +21,7 @@ public sealed class MainForm : Form
 
         _useFixedTitle = !string.IsNullOrWhiteSpace(_settings.Title);
         Text = _useFixedTitle ? _settings.Title : "PinBrowser";
+        ShowInTaskbar = _settings.ShowInTaskbar;
 
         var icon = TryLoadIcon(_settings.IconPath);
         _useFavicon = icon is null;
