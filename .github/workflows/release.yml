@@ -1,0 +1,42 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Publish self-contained single-file exe
+        run: dotnet publish src/PinBrowser/PinBrowser.csproj -c Release -r win-x64 --self-contained true -o publish
+
+      - name: Rename exe with version
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}" -replace '^v', ''
+          Copy-Item publish/PinBrowser.exe "publish/PinBrowser-$version-win-x64.exe"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: PinBrowser-win-x64
+          path: publish/PinBrowser-*-win-x64.exe
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: publish/PinBrowser-*-win-x64.exe
+          generate_release_notes: true

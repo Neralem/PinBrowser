@@ -104,3 +104,21 @@ src/PinBrowser/
   AutoStart.cs          Registry-Eintrag für Windows-Autostart (pro Instanz)
   ThemeHelper.cs        Windows-Design erkennen und auf die Titelleiste anwenden
 ```
+
+## Release erstellen
+
+Die Version steht in `<Version>` in [PinBrowser.csproj](src/PinBrowser/PinBrowser.csproj) (aktuell `0.0.1`).
+Um einen GitHub Release mit fertiger `.exe` zum Download zu erzeugen:
+
+1. Version in der `.csproj` ggf. anpassen und committen.
+2. Einen Tag im Format `vX.Y.Z` pushen, z. B.:
+   ```
+   git tag v0.0.1
+   git push origin v0.0.1
+   ```
+3. Der Workflow [.github/workflows/release.yml](.github/workflows/release.yml) baut daraufhin auf
+   `windows-latest` die self-contained Single-File-exe und veröffentlicht sie als Anhang
+   (`PinBrowser-<version>-win-x64.exe`) am GitHub Release zu diesem Tag.
+
+Der Workflow lässt sich auch manuell über "Run workflow" in den GitHub Actions auslösen (Tab
+"Actions"), dann aber nur als Build-Artefakt zum Download – ohne Tag wird kein Release angelegt.
